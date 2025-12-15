@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>NgaDe'o</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-black min-h-screen text-white font-[Inter]">
+
+  <!-- Header -->
+  <header class="text-center py-10">
+    <h1 class="text-3xl md:text-4xl font-bold tracking-tight">
+      🍽️ Pilih Warung
+    </h1>
+    <p class="text-slate-400 mt-2">
+      Silakan pilih warung favoritmu
+    </p>
+  </header>
+
+  <!-- List Warung -->
+  <main class="max-w-6xl mx-auto px-4 pb-20">
+    <div class="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+
+      <!-- Warung Klasik -->
+      <a href="warung-klasik.html"
+         class="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-6 hover:scale-[1.03] transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20">
+        
+      
+
+        <h2 class="text-xl font-bold mb-2 group-hover:text-amber-400 transition">
+          Warung Klasik
+        </h2>
+
+        <p class="text-sm text-slate-400">
+          Cireng, batagor, jajanan tradisional
+        </p>
+
+      
+
+      <!-- Warung Amoy -->
+      <a href="warung-amoy.html"
+         class="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-6 hover:scale-[1.03] transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/20">
+
+        <div class="absolute top-3 right-3 bg-green-500 text-xs px-3 py-1 rounded-full text-black font-semibold">
+          OPEN
+        </div>
+
+        <h2 class="text-xl font-bold mb-2 group-hover:text-pink-400 transition">
+          Warung Amoy
+        </h2>
+
+        <p class="text-sm text-slate-400">
+          Minuman, snack viral & estetik
+        </p>
+
+        <div class="mt-6 text-sm text-pink-400 font-semibold">
+          Masuk →
+        </div>
+      </a>
+
+      <!-- Warung Tambahan -->
+      <div
+        class="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur border border-dashed border-white/20 p-6 flex flex-col items-center justify-center text-slate-400">
+        
+        <span class="text-3xl mb-2">➕</span>
+        <p class="text-sm">Warung baru</p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="fixed bottom-0 left-0 right-0 bg-black/40 backdrop-blur border-t border-white/10 text-center py-3 text-xs text-slate-400">
+    © 2025 Warung App
+  </footer>
+
+</body>
+</html>
