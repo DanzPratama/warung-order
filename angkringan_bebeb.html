@@ -26,8 +26,7 @@ background: linear-gradient(
 
 <!-- HEADER -->
 <!-- STICKY HEADER WRAPPER -->
-<div class="sticky top-0 z-40 backdrop-blur-xl bg-white/10 border-b border-white/10">
-
+<div class="sticky top-0 z-40 backdrop-blur-xl bg-amber-900/20 border-b border-amber-900/20">
   <!-- TOP HEADER -->
   <div class="p-4 text-center font-semibold">
     Order Angkringan Bebeb
@@ -43,7 +42,7 @@ background: linear-gradient(
   <!-- CUSTOMER TABS -->
   <!-- CUSTOMER TABS -->
 <div id="customerTabs"
-  class="bg-black/30 border-t border-white/10 px-4 py-2 flex gap-2 overflow-x-auto">
+  class="bg-amber-900/30 border-t border-amber-800/30 px-4 py-2 flex gap-2 overflow-x-auto">
 </div>
 
 <!-- USER TOTAL BAR -->
@@ -223,19 +222,19 @@ for (const k in menus) {
   menus[k].forEach(m => {
     html += `
    <div class="menu-item" data-name="${m[0]}" data-price="${m[1]}">
-  <div class="bg-white/20 border border-white/30 rounded-2xl p-4 text-slate-900 backdrop-blur">
+  <div class="bg-amber-50/70 border-amber-300/50 text-slate-800 rounded-2xl p-4 text-slate-900 backdrop-blur">
     
     <!-- NAMA MENU -->
     <h3 class="font-semibold">${m[0]}</h3>
 
     <!-- HARGA -->
-    <p class="text-sm text-slate-700">
+    <p class="text-sm text-amber-900/80">
       Rp ${m[1].toLocaleString('id-ID')}
     </p>
 
     <!-- QTY CONTROL -->
     <div class="qty-wrapper mt-3 hidden flex justify-between items-center 
-                bg-white/40 rounded-xl px-3 py-2 text-slate-900">
+                bg-amber-100 text-amber-900 rounded-xl px-3 py-2 ">
       <button class="qtyMinus font-bold">−</button>
       <span class="qtyText font-semibold">0</span>
       <button class="qtyPlus font-bold">+</button>
