@@ -166,10 +166,11 @@ const menus = {
   ]
 };
 
-// ================= RENDER MENU =================
+// ===== RENDER MENU =====
 for (const k in menus) {
-  let html = `<div><h2 class="font-semibold mb-2">${k}</h2>
-  <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">`;
+  let html = `<div>
+    <h2 class="font-semibold mb-2">${k}</h2>
+    <div class="grid grid-cols-2 gap-4">`;
 
   menus[k].forEach(m => {
     html += `
@@ -177,15 +178,14 @@ for (const k in menus) {
       <div class="bg-white/10 border border-white/20 rounded-2xl p-4">
         <h3 class="font-semibold">${m[0]}</h3>
         <p class="text-sm text-white/70">Rp ${m[1].toLocaleString('id-ID')}</p>
-       <div class="qty-wrapper mt-3 hidden flex justify-between items-center bg-white/20 rounded-xl px-3 py-2">
-  <button class="qtyMinus">−</button>
-  <span class="qtyText">0</span>
-  <button class="qtyPlus">+</button>
-</div>
 
-<button class="addMenu mt-3 w-full py-2 rounded-xl bg-white/20">➕ Tambah</button>
+        <div class="qty-wrapper hidden mt-3 flex justify-between items-center bg-white/20 rounded-xl px-3 py-2">
+          <button class="qtyMinusMenu">−</button>
+          <span class="qtyText">0</span>
+          <button class="qtyPlusMenu">+</button>
+        </div>
 
-
+        <button class="addMenu mt-3 w-full py-2 rounded-xl bg-white/20">➕ Tambah</button>
       </div>
     </div>`;
   });
@@ -193,50 +193,12 @@ for (const k in menus) {
   html += `</div></div>`;
   $('#menuArea').append(html);
 }
-  // ================= TEXT WA =================
-  let waAdminText = `LIST PESANAN (SEMUA USER)%0A`;
-  let waCustomerText = `Halo, saya mau pesan:%0A`;
 
-  for (const m in map) {
-    const sub = map[m].qty * map[m].price;
-
-    $('#cartList').append(`
-      <li class="flex justify-between items-center bg-black/60 p-3 rounded-xl">
-        <div>
-          <div class="font-semibold text-yellow-400">${m}</div>
-          <div class="text-xs text-slate-300">Rp ${map[m].price.toLocaleString('id-ID')}</div>
-        </div>
-        <span class="text-yellow-400">x${map[m].qty}</span>
-      </li>
-    `);
-
-    waAdminText += `- ${m} x${map[m].qty} = Rp ${sub.toLocaleString('id-ID')}%0A`;
-    waCustomerText += `- ${m} x${map[m].qty}%0A`;
-  }
-
-  waAdminText += `%0ATOTAL: Rp ${total.toLocaleString('id-ID')}`;
-  waCustomerText += `%0ATotal: Rp ${total.toLocaleString('id-ID')}`;
-
-  $('#cartTotal').text(total.toLocaleString('id-ID'));
-
-  // GANTI NOMOR SESUAI KEBUTUHAN
-  $('#waAdmin').attr(
-    'href',
-    `https://wa.me/6285141621879?text=${waAdminText}`
-  );
-
-  $('#waCustomer').attr(
-    'href',
-    `https://wa.me/6285141621879?text=${waCustomerText}`
-  );
-
-
-
-// ================= DATA =================
+// ===== DATA =====
 let customers = [];
 let activeCustomer = null;
 
-// ================= ADD CUSTOMER =================
+// ===== ADD CUSTOMER =====
 $('#addCustomer').click(() => {
   const name = $('#namaPemesan').val().trim();
   if (!name) return;
@@ -246,17 +208,21 @@ $('#addCustomer').click(() => {
 
   $('#customerTabs').append(`
     <button class="customer-btn bg-green-500 px-4 py-1 rounded-full"
-      data-index="${activeCustomer}">${name}</button>`);
+      data-index="${activeCustomer}">${name}</button>
+  `);
 
   $('#namaPemesan').val('');
+  syncMenuQty();
+  updateUserTotal();
 });
 
-// ================= CLICK NAME =================
+// ===== SYNC MENU =====
 function syncMenuQty() {
+  if (activeCustomer === null) return;
+  const user = customers[activeCustomer];
+
   $('.menu-item').each(function () {
     const name = $(this).data('name');
-    const user = customers[activeCustomer];
-
     if (user.items[name]) {
       $(this).find('.addMenu').addClass('hidden');
       $(this).find('.qty-wrapper').removeClass('hidden');
@@ -268,17 +234,18 @@ function syncMenuQty() {
   });
 }
 
+// ===== SELECT CUSTOMER =====
 $(document).on('click', '.customer-btn', function () {
   activeCustomer = $(this).data('index');
   $('.customer-btn').removeClass('bg-green-500');
   $(this).addClass('bg-green-500');
-  updateUserTotal();
   syncMenuQty();
+  updateUserTotal();
 });
 
-// ================= ADD MENU =================
+// ===== ADD MENU =====
 $(document).on('click', '.addMenu', function () {
-  if (activeCustomer === null) return alert('Pilih / tambah nama dulu');
+  if (activeCustomer === null) return alert('Tambah nama dulu');
 
   const card = $(this).closest('.menu-item');
   const name = card.data('name');
@@ -288,17 +255,35 @@ $(document).on('click', '.addMenu', function () {
   if (!user.items[name]) user.items[name] = { qty: 0, price };
   user.items[name].qty++;
 
-  // UI
-  card.find('.addMenu').addClass('hidden');
-  card.find('.qty-wrapper').removeClass('hidden');
-  card.find('.qtyText').text(user.items[name].qty);
-
+  syncMenuQty();
   updateGlobalCart();
-   updateUserTotal();
+  updateUserTotal();
 });
 
+// ===== QTY MENU =====
+$(document).on('click', '.qtyPlusMenu', function () {
+  const card = $(this).closest('.menu-item');
+  const name = card.data('name');
+  customers[activeCustomer].items[name].qty++;
+  syncMenuQty();
+  updateGlobalCart();
+  updateUserTotal();
+});
 
-// ================= UPDATE CART =================
+$(document).on('click', '.qtyMinusMenu', function () {
+  const card = $(this).closest('.menu-item');
+  const name = card.data('name');
+  const user = customers[activeCustomer];
+
+  user.items[name].qty--;
+  if (user.items[name].qty <= 0) delete user.items[name];
+
+  syncMenuQty();
+  updateGlobalCart();
+  updateUserTotal();
+});
+
+// ===== GLOBAL CART =====
 function updateGlobalCart() {
   let map = {};
   let total = 0;
@@ -306,151 +291,64 @@ function updateGlobalCart() {
 
   customers.forEach(c => {
     for (const m in c.items) {
-      const { qty, price } = c.items[m];
-      if (!map[m]) map[m] = { qty: 0, price };
-      map[m].qty += qty;
-      total += qty * price;
-      item += qty;
+      if (!map[m]) map[m] = { qty: 0, price: c.items[m].price };
+      map[m].qty += c.items[m].qty;
+      total += c.items[m].qty * c.items[m].price;
+      item += c.items[m].qty;
     }
   });
 
   $('#totalItem').text(item);
   $('#totalHarga').text(total.toLocaleString('id-ID'));
-
+  $('#cartTotal').text(total.toLocaleString('id-ID'));
   $('#cartList').html('');
-  let waText = 'Halo, saya mau pesan:%0A';
+
+  let waAdmin = `LIST PESANAN%0A`;
+  let waCust = `Halo, saya mau pesan:%0A`;
 
   for (const m in map) {
-    const sub = map[m].qty * map[m].price;
-
     $('#cartList').append(`
-      <li class="flex justify-between items-center bg-white/10 p-3 rounded-xl">
-        <div>
-          <div class="font-semibold">${m}</div>
-          <div class="text-xs text-white/70">Rp ${map[m].price.toLocaleString('id-ID')}</div>
-        </div>
-        <div class="flex items-center gap-2">
-          <button class="qtyMinus bg-red-500 px-2 rounded" data-name="${m}">−</button>
-          <span>${map[m].qty}</span>
-          <button class="qtyPlus bg-green-500 px-2 rounded" data-name="${m}">+</button>
-        </div>
+      <li class="flex justify-between">
+        <span>${m} x${map[m].qty}</span>
+        <span>Rp ${(map[m].qty * map[m].price).toLocaleString('id-ID')}</span>
       </li>
     `);
 
-    waText += `- ${m} x${map[m].qty}%0A`;
+    waAdmin += `- ${m} x${map[m].qty}%0A`;
+    waCust += `- ${m} x${map[m].qty}%0A`;
   }
 
-  waText += `%0ATotal: Rp ${total.toLocaleString('id-ID')}`;
-  $('#cartTotal').text(total.toLocaleString('id-ID'));
-  $('#orderWA').attr('href', `https://wa.me/62XXXXXXXXXX?text=${waText}`);
+  waAdmin += `%0ATOTAL: Rp ${total.toLocaleString('id-ID')}`;
+  waCust += `%0ATotal: Rp ${total.toLocaleString('id-ID')}`;
+
+  $('#waAdmin').attr('href', `https://wa.me/6285141621879?text=${waAdmin}`);
+  $('#waCustomer').attr('href', `https://wa.me/6285141621879?text=${waCust}`);
 }
 
-// ================= QTY PLUS / MINUS =================
-$(document).on('click', '.qtyPlus', function () {
-  const card = $(this).closest('.menu-item');
-  const name = card.data('name');
-  const price = card.data('price');
-
-  const user = customers[activeCustomer];
-  user.items[name].qty++;
-
-  card.find('.qtyText').text(user.items[name].qty);
-  updateGlobalCart();
-   updateUserTotal();
-});
-
-
-$(document).on('click', '.qtyMinus', function () {
-  const card = $(this).closest('.menu-item');
-  const name = card.data('name');
-
-  const user = customers[activeCustomer];
-  user.items[name].qty--;
-
-  if (user.items[name].qty <= 0) {
-    delete user.items[name];
-    card.find('.qty-wrapper').addClass('hidden');
-    card.find('.addMenu').removeClass('hidden');
-  } else {
-    card.find('.qtyText').text(user.items[name].qty);
-  }
-
-  updateGlobalCart();
-   updateUserTotal();
-});
-
-
-// ================= TOGGLE =================
-$('#openCart').click(() => $('#cartSheet').removeClass('hidden'));
-$('#closeCart, #cartSheet').click(e => {
-  if (e.target.id === 'cartSheet' || e.target.id === 'closeCart')
-    $('#cartSheet').addClass('hidden');
-});
-
-$('#closePerson, #modalPerson').click(e => {
-  if (e.target.id === 'modalPerson' || e.target.id === 'closePerson')
-    $('#modalPerson').addClass('hidden');
-});
-
+// ===== USER TOTAL =====
 function updateUserTotal() {
-  if (activeCustomer === null) {
-    $('#userTotalBar').addClass('hidden');
-    return;
-  }
+  if (activeCustomer === null) return $('#userTotalBar').addClass('hidden');
 
   const user = customers[activeCustomer];
-  let total = 0;
-  let item = 0;
+  let total = 0, item = 0;
 
   for (const m in user.items) {
     total += user.items[m].qty * user.items[m].price;
     item += user.items[m].qty;
   }
 
-  $('#userTotalText').text(
-    `🧑 ${user.name} — ${item} item | Rp ${total.toLocaleString('id-ID')}`
-  );
-
+  $('#userTotalText').text(`🧑 ${user.name} — ${item} item | Rp ${total.toLocaleString('id-ID')}`);
   $('#userTotalBar').removeClass('hidden');
 }
 
-$('#btnUserDetail').click(() => {
-  if (activeCustomer === null) return;
-
-  const user = customers[activeCustomer];
-  $('#userDetailTitle').text(`🧾 Detail Pesanan — ${user.name}`);
-  $('#userDetailList').html('');
-
-  let total = 0;
-
-  for (const m in user.items) {
-    const { qty, price } = user.items[m];
-    const sub = qty * price;
-    total += sub;
-
-    $('#userDetailList').append(`
-      <li class="flex justify-between">
-        <span>${m} x${qty}</span>
-        <span>Rp ${sub.toLocaleString('id-ID')}</span>
-      </li>
-    `);
-  }
-
-  $('#userDetailTotal').text(`Rp ${total.toLocaleString('id-ID')}`);
-  $('#modalUserDetail').removeClass('hidden');
+// ===== CART TOGGLE =====
+$('#openCart').click(() => $('#cartSheet').removeClass('hidden'));
+$('#closeCart, #cartSheet').click(e => {
+  if (e.target.id === 'cartSheet' || e.target.id === 'closeCart')
+    $('#cartSheet').addClass('hidden');
 });
-// CLOSE MODAL USER DETAIL
-$(document).on('click', '#closeUserDetail', function () {
-  $('#modalUserDetail').addClass('hidden');
-});
-
-$(document).on('click', '#modalUserDetail', function (e) {
-  if (e.target.id === 'modalUserDetail') {
-    $('#modalUserDetail').addClass('hidden');
-  }
-});
-
 </script>
+
 <!-- MODAL DETAIL USER -->
 <div id="modalUserDetail"
   class="fixed inset-0 hidden z-50 flex items-center justify-center bg-black/60">
