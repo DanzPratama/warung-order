@@ -193,6 +193,44 @@ for (const k in menus) {
   html += `</div></div>`;
   $('#menuArea').append(html);
 }
+  // ================= TEXT WA =================
+  let waAdminText = `LIST PESANAN (SEMUA USER)%0A`;
+  let waCustomerText = `Halo, saya mau pesan:%0A`;
+
+  for (const m in map) {
+    const sub = map[m].qty * map[m].price;
+
+    $('#cartList').append(`
+      <li class="flex justify-between items-center bg-black/60 p-3 rounded-xl">
+        <div>
+          <div class="font-semibold text-yellow-400">${m}</div>
+          <div class="text-xs text-slate-300">Rp ${map[m].price.toLocaleString('id-ID')}</div>
+        </div>
+        <span class="text-yellow-400">x${map[m].qty}</span>
+      </li>
+    `);
+
+    waAdminText += `- ${m} x${map[m].qty} = Rp ${sub.toLocaleString('id-ID')}%0A`;
+    waCustomerText += `- ${m} x${map[m].qty}%0A`;
+  }
+
+  waAdminText += `%0ATOTAL: Rp ${total.toLocaleString('id-ID')}`;
+  waCustomerText += `%0ATotal: Rp ${total.toLocaleString('id-ID')}`;
+
+  $('#cartTotal').text(total.toLocaleString('id-ID'));
+
+  // GANTI NOMOR SESUAI KEBUTUHAN
+  $('#waAdmin').attr(
+    'href',
+    `https://wa.me/6285141621879?text=${waAdminText}`
+  );
+
+  $('#waCustomer').attr(
+    'href',
+    `https://wa.me/6285141621879?text=${waCustomerText}`
+  );
+}
+
 
 // ================= DATA =================
 let customers = [];
