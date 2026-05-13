@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mie Setan King</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<style>
+body{
+  background: linear-gradient(to bottom,#0f0f0f,#1a1a1a);
+}
+
+::-webkit-scrollbar{
+  display:none;
+}
+
+.glass{
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(18px);
+  border:1px solid rgba(255,255,255,0.1);
+}
+
+.active-user{
+  background:#ef4444 !important;
+}
+</style>
+</head>
+
+<body class="text-white">
+
+<!-- HEADER -->
+<div class="sticky top-0 z-40 glass border-b border-white/10 p-4">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="font-bold text-xl">🔥 Mie Setan King</h1>
+      <p class="text-xs text-white/60">
+        Pesanan rame-rame
+      </p>
+    </div>
+
+    <button id="openCart"
+      class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl text-sm font-semibold">
+      🛒 Keranjang
+    </button>
+  </div>
+</div>
+
+<!-- ADD CUSTOMER -->
+<div class="p-4 flex gap-2">
+  <input
+    id="namaPemesan"
+    type="text"
+    placeholder="Nama pemesan..."
+    class="flex-1 glass rounded-2xl px-4 py-3 outline-none">
+
+  <button id="addCustomer"
+    class="bg-red-500 hover:bg-red-600 px-5 rounded-2xl font-semibold">
+    +
+  </button>
+</div>
+
+<!-- USER BUTTON -->
+<div id="customerTabs"
+  class="px-4 pb-2 flex gap-2 overflow-x-auto">
+</div>
+
+<!-- MENU -->
+<div id="menuContainer"
+  class="px-4 pb-40 space-y-8">
+</div>
+
+<!-- TOTAL FLOAT -->
+<div
+  class="fixed bottom-0 left-0 right-0 z-40 glass border-t border-white/10 p-4 flex justify-between">
+
+  <div>
+    <p class="text-xs text-white/60">Total Item</p>
+    <p class="font-bold">
+      <span id="totalItem">0</span>
+    </p>
+  </div>
+
+  <div class="text-right">
+    <p class="text-xs text-white/60">Total Harga</p>
+    <p class="font-bold text-red-400">
+      Rp <span id="totalHarga">0</span>
+    </p>
+  </div>
+
+</div>
+
+<!-- POPUP DETAIL USER -->
+<div id="modalUser"
+  class="fixed inset-0 hidden z-50 bg-black/70 flex items-center justify-center">
+
+  <div class="glass w-11/12 max-w-md rounded-3xl p-5">
+
+    <div class="flex justify-between items-center mb-4">
+      <h2 id="modalUserName"
+        class="font-bold text-lg"></h2>
+
+      <button id="closeModalUser"
+        class="text-white/60 text-xl">
+        ✕
+      </button>
+    </div>
+
+    <div id="modalUserList"
+      class="space-y-2 text-sm">
+    </div>
+
+    <div class="mt-4 pt-4 border-t border-white/10">
+      <p class="font-bold text-red-400">
+        Total :
+        Rp <span id="modalUserTotal">0</span>
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<!-- BOTTOM SHEET -->
+<div id="cartSheet"
+  class="fixed inset-0 hidden z-50 bg-black/60 flex items-end">
+
+  <div
+    class="glass w-full rounded-t-[35px] p-5 max-h-[85vh] overflow-y-auto">
+
+    <div class="flex justify-between items-center mb-5">
+      <h2 class="font-bold text-xl">
+        🧾 Keranjang Pesanan
+      </h2>
+
+      <button id="closeCart"
+        class="text-xl text-white/60">
+        ✕
+      </button>
+    </div>
+
+    <div id="cartList"
+      class="space-y-3">
+    </div>
+
+    <div
+      class="mt-5 border-t border-white/10 pt-4 flex justify-between font-bold">
+
+      <span>Total</span>
+
+      <span class="text-red-400">
+        Rp <span id="cartTotal">0</span>
+      </span>
+
+    </div>
+
+    <a id="orderWA"
+      target="_blank"
+      class="block mt-5 bg-green-500 hover:bg-green-600 text-center py-4 rounded-2xl font-bold">
+      📲 Order ke WhatsApp
+    </a>
+
+  </div>
+</div>
+
+<script>
+
+// ================= DATA MENU =================
+const menus = {
+
+  "🔥 Mie Setan King": [
+    ["Mie Toping Sosis + Baso",10000],
+    ["Mie Toping Kornet",10000],
+    ["Mie Toping Telur",14000],
+    ["Mie Toping Sosis Besar",13000],
+    ["Mie Toping Ayam Katsu",15000],
+    ["Mie Toping Ayam Geprek",18000],
+  ],
+
+  "🌶️ Mie Gober": [
+    ["Mie Gober Pedas Manis",10000],
+    ["Mie Gober Pedas Asin",10000],
+    ["Pangsit Gober Isi 4",10000],
+  ],
+
+  "🍜 Mie Nampol Chili Oil": [
+    ["Mie Nampol Chili Oil",10000],
+  ],
+
+  "🍗 Rice Bowl": [
+    ["Rice Bowl Chicken Teriyaki",10000],
+    ["Rice Bowl Ayam Katsu BBQ",10000],
+    ["Rice Bowl Chicken Korean Fire",10000],
+    ["Rice Bowl Chicken Lava",10000],
+    ["Rice Bowl Chicken/Katsu Ori",10000],
+    ["Tambahan Screamble Egg",5000],
+  ],
+
+  "🧋 Milk Drink & Tea": [
+    ["Taro",10000],
+    ["Choco Royal",10000],
+    ["Green Tea Matcha",10000],
+    ["Tiramisu",10000],
+    ["Vanila Oreo",10000],
+    ["Avocado Milk Choco",10000],
+    ["Coffee Caramel",10000],
+    ["Red Velvet",10000],
+    ["Thai Tea Ori",10000],
+    ["Es Tea",5000],
+    ["Lemon Tea",8000],
+    ["Orange",5000],
+  ],
+
+  "✨ Topping": [
+    ["Cheese Cream",4000],
+    ["Bubble",2000],
+    ["Oreo",2000],
+  ],
+
+  "🍟 Jajan Gen Z": [
+    ["Kentang Goreng Crispy",5000],
+    ["Tulang Mercon",10000],
+    ["Baso Bakar",5000],
+    ["Sosis Bakar Lava",5000],
+    ["Cigor + Tulang + Ceker",10000],
+    ["Cimol Bojot",8000],
+    ["Tahu Cabe Garam Crispy",8000],
+    ["Ceker Mercon",10000],
+    ["Pangsit Dower Chili Oil",10000],
+  ]
+
+};
+
+// ================= RENDER MENU =================
+for(const kategori in menus){
+
+  let html = `
+  <div>
+
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-2 h-8 bg-red-500 rounded-full"></div>
+      <h2 class="font-bold text-lg">${kategori}</h2>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+  `;
+
+  menus[kategori].forEach(menu => {
+
+    html += `
+    <div class="glass rounded-3xl p-4">
+
+      <div class="flex justify-between items-start gap-2">
+
+        <h3 class="font-semibold text-sm leading-snug">
+          ${menu[0]}
+        </h3>
+
+        <span class="text-red-400 text-xs font-bold">
+          ${(menu[1]/1000)}K
+        </span>
+
+      </div>
+
+      <button
+        class="addMenu mt-4 w-full bg-white/10 hover:bg-white/20 py-2 rounded-xl text-sm"
+        data-name="${menu[0]}"
+        data-price="${menu[1]}">
+
+        ➕ Tambah
+
+      </button>
+
+    </div>
+    `;
+
+  });
+
+  html += `</div></div>`;
+
+  $('#menuContainer').append(html);
+}
+
+// ================= DATA =================
+let customers = [];
+let activeCustomer = null;
+
+// ================= ADD USER =================
+$('#addCustomer').click(function(){
+
+  let name = $('#namaPemesan').val().trim();
+
+  if(!name) return;
+
+  customers.push({
+    name:name,
+    items:{}
+  });
+
+  activeCustomer = customers.length - 1;
+
+  renderUsers();
+
+  $('#namaPemesan').val('');
+
+});
+
+// ================= RENDER USER =================
+function renderUsers(){
+
+  $('#customerTabs').html('');
+
+  customers.forEach((c,i)=>{
+
+    $('#customerTabs').append(`
+      <button
+        class="customerBtn px-4 py-2 rounded-full glass whitespace-nowrap ${activeCustomer===i ? 'active-user':''}"
+        data-index="${i}">
+        👤 ${c.name}
+      </button>
+    `);
+
+  });
+
+}
+
+// ================= CLICK USER =================
+$(document).on('click','.customerBtn',function(){
+
+  activeCustomer = $(this).data('index');
+
+  renderUsers();
+
+});
+
+// ================= DOUBLE CLICK USER =================
+$(document).on('dblclick','.customerBtn',function(){
+
+  let index = $(this).data('index');
+  let user = customers[index];
+
+  $('#modalUserName').text('👤 ' + user.name);
+
+  $('#modalUserList').html('');
+
+  let total = 0;
+
+  for(const menu in user.items){
+
+    let item = user.items[menu];
+    let sub = item.qty * item.price;
+
+    total += sub;
+
+    $('#modalUserList').append(`
+      <div class="flex justify-between glass rounded-xl px-3 py-2">
+        <span>${menu} x${item.qty}</span>
+        <span>Rp ${sub.toLocaleString('id-ID')}</span>
+      </div>
+    `);
+
+  }
+
+  $('#modalUserTotal').text(total.toLocaleString('id-ID'));
+
+  $('#modalUser').removeClass('hidden');
+
+});
+
+// ================= CLOSE USER MODAL =================
+$('#closeModalUser,#modalUser').click(function(e){
+
+  if(
+    e.target.id === 'modalUser' ||
+    e.target.id === 'closeModalUser'
+  ){
+    $('#modalUser').addClass('hidden');
+  }
+
+});
+
+// ================= ADD MENU =================
+$(document).on('click','.addMenu',function(){
+
+  if(activeCustomer === null){
+    alert('Tambah nama pemesan dulu');
+    return;
+  }
+
+  let name = $(this).data('name');
+  let price = $(this).data('price');
+
+  let user = customers[activeCustomer];
+
+  if(!user.items[name]){
+
+    user.items[name] = {
+      qty:0,
+      price:price
+    };
+
+  }
+
+  user.items[name].qty++;
+
+  updateCart();
+
+});
+
+// ================= UPDATE CART =================
+function updateCart(){
+
+  let gabung = {};
+  let totalItem = 0;
+  let totalHarga = 0;
+
+  customers.forEach(user=>{
+
+    for(const menu in user.items){
+
+      let item = user.items[menu];
+
+      if(!gabung[menu]){
+
+        gabung[menu] = {
+          qty:0,
+          price:item.price
+        };
+
+      }
+
+      gabung[menu].qty += item.qty;
+
+      totalItem += item.qty;
+      totalHarga += item.qty * item.price;
+
+    }
+
+  });
+
+  $('#totalItem').text(totalItem);
+
+  $('#totalHarga').text(
+    totalHarga.toLocaleString('id-ID')
+  );
+
+  $('#cartTotal').text(
+    totalHarga.toLocaleString('id-ID')
+  );
+
+  $('#cartList').html('');
+
+  let waText = `Halo, saya mau pesan :%0A%0A`;
+
+  for(const menu in gabung){
+
+    let item = gabung[menu];
+
+    let sub = item.qty * item.price;
+
+    $('#cartList').append(`
+      <div class="glass rounded-2xl p-3 flex justify-between">
+        <div>
+          <p class="font-semibold text-sm">${menu}</p>
+          <p class="text-xs text-white/60">
+            x${item.qty}
+          </p>
+        </div>
+
+        <p class="text-red-400 font-bold text-sm">
+          Rp ${sub.toLocaleString('id-ID')}
+        </p>
+      </div>
+    `);
+
+    waText += `• ${menu} x${item.qty}%0A`;
+
+  }
+
+  waText += `%0ATotal : Rp ${totalHarga.toLocaleString('id-ID')}`;
+
+  $('#orderWA').attr(
+    'href',
+    `https://wa.me/6285141621879?text=${waText}`
+  );
+
+}
+
+// ================= OPEN CART =================
+$('#openCart').click(function(){
+
+  $('#cartSheet').removeClass('hidden');
+
+});
+
+// ================= CLOSE CART =================
+$('#closeCart,#cartSheet').click(function(e){
+
+  if(
+    e.target.id === 'cartSheet' ||
+    e.target.id === 'closeCart'
+  ){
+    $('#cartSheet').addClass('hidden');
+  }
+
+});
+
+</script>
+
+</body>
+</html>
