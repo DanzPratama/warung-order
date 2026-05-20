@@ -33,7 +33,9 @@ body{
 
 <!-- HEADER -->
 <div class="sticky top-0 z-40 glass border-b border-white/10 p-4">
-  <div class="flex items-center justify-between">
+
+  <div class="flex items-center justify-between gap-3">
+
     <div>
       <h1 class="font-bold text-xl">🔥 Mie Setan King</h1>
       <p class="text-xs text-white/60">
@@ -42,10 +44,21 @@ body{
     </div>
 
     <button id="openCart"
-      class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl text-sm font-semibold">
+      class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap">
       🛒 Keranjang
     </button>
+
   </div>
+
+  <!-- SEARCH -->
+  <div class="mt-4">
+    <input
+      type="text"
+      id="searchMenu"
+      placeholder="Cari menu..."
+      class="w-full glass rounded-2xl px-4 py-3 outline-none text-sm">
+  </div>
+
 </div>
 
 <!-- ADD CUSTOMER -->
@@ -236,7 +249,7 @@ const menus = {
 for(const kategori in menus){
 
   let html = `
-  <div>
+  <div class="menu-group">
 
     <div class="flex items-center gap-2 mb-4">
       <div class="w-2 h-8 bg-red-500 rounded-full"></div>
@@ -249,7 +262,8 @@ for(const kategori in menus){
   menus[kategori].forEach(menu => {
 
     html += `
-    <div class="glass rounded-3xl p-4">
+    <div class="menu-card glass rounded-3xl p-4"
+      data-search="${menu[0].toLowerCase()}">
 
       <div class="flex justify-between items-start gap-2">
 
@@ -257,20 +271,36 @@ for(const kategori in menus){
           ${menu[0]}
         </h3>
 
-        <span class="text-red-400 text-xs font-bold">
+        <span class="text-red-400 text-xs font-bold whitespace-nowrap">
           ${(menu[1]/1000)}K
         </span>
 
       </div>
 
-      <button
-        class="addMenu mt-4 w-full bg-white/10 hover:bg-white/20 py-2 rounded-xl text-sm"
-        data-name="${menu[0]}"
-        data-price="${menu[1]}">
+      <!-- QTY -->
+      <div class="flex items-center justify-between mt-4">
 
-        ➕ Tambah
+        <button
+          class="minusMenu w-9 h-9 rounded-xl bg-white/10 text-lg"
+          data-name="${menu[0]}"
+          data-price="${menu[1]}">
+          −
+        </button>
 
-      </button>
+        <span
+          class="menuQty font-bold text-lg"
+          data-name="${menu[0]}">
+          0
+        </span>
+
+        <button
+          class="plusMenu w-9 h-9 rounded-xl bg-red-500 text-lg"
+          data-name="${menu[0]}"
+          data-price="${menu[1]}">
+          +
+        </button>
+
+      </div>
 
     </div>
     `;
@@ -322,6 +352,8 @@ function renderUsers(){
     `);
 
   });
+
+  updateQtyDisplay();
 
 }
 
@@ -380,8 +412,8 @@ $('#closeModalUser,#modalUser').click(function(e){
 
 });
 
-// ================= ADD MENU =================
-$(document).on('click','.addMenu',function(){
+// ================= PLUS MENU =================
+$(document).on('click','.plusMenu',function(){
 
   if(activeCustomer === null){
     alert('Tambah nama pemesan dulu');
@@ -404,9 +436,52 @@ $(document).on('click','.addMenu',function(){
 
   user.items[name].qty++;
 
+  updateQtyDisplay();
   updateCart();
 
 });
+
+// ================= MINUS MENU =================
+$(document).on('click','.minusMenu',function(){
+
+  if(activeCustomer === null) return;
+
+  let name = $(this).data('name');
+
+  let user = customers[activeCustomer];
+
+  if(user.items[name]){
+
+    user.items[name].qty--;
+
+    if(user.items[name].qty <= 0){
+      delete user.items[name];
+    }
+
+  }
+
+  updateQtyDisplay();
+  updateCart();
+
+});
+
+// ================= UPDATE QTY DISPLAY =================
+function updateQtyDisplay(){
+
+  $('.menuQty').text('0');
+
+  if(activeCustomer === null) return;
+
+  let user = customers[activeCustomer];
+
+  for(const menu in user.items){
+
+    $(`.menuQty[data-name="${menu}"]`)
+      .text(user.items[menu].qty);
+
+  }
+
+}
 
 // ================= UPDATE CART =================
 function updateCart(){
@@ -482,10 +557,27 @@ function updateCart(){
 
   $('#orderWA').attr(
     'href',
-    `https://wa.me/6285141621879?text=${waText}`
+    `https://wa.me/6281234567890?text=${waText}`
   );
 
 }
+
+// ================= SEARCH =================
+$('#searchMenu').on('keyup', function(){
+
+  let value = $(this).val().toLowerCase();
+
+  $('.menu-card').each(function(){
+
+    let text = $(this).data('search');
+
+    $(this).toggle(
+      text.includes(value)
+    );
+
+  });
+
+});
 
 // ================= OPEN CART =================
 $('#openCart').click(function(){
